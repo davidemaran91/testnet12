@@ -88,9 +88,8 @@ class MixdropExtractor:
         if "/f/" in url: url = url.replace("/f/", "/e/")
         if "/emb/" in url: url = url.replace("/emb/", "/e/")
         
-        known_mirrors = ["mixdrop.co", "mixdrop.to", "mixdrop.ch", "mixdrop.ag", 
-                         "mixdrop.gl", "mixdrop.club", "m1xdrop.net", "mixdrop.top", "mixdrop.nz",
-                         "mixdrop.vc", "mixdrop.sx", "mixdrop.bz", "mdy48tn97.com", "mixdrop.vip", "mixdrop.si"]
+        known_mirrors = ["mixdrop.to", "m1xdrop.net", "mixdrop.bz", "mixdrop.si", 
+                         "mixdrop.ag", "mixdrop.top", "mixdrop.sx", "mdy48tn97.com"]
         
         mirror_found = False
         for mirror in known_mirrors:
