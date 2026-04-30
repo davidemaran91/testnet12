@@ -1,0 +1,18 @@
+yaml
+name: Sync Fork
+on:
+  schedule:
+    - cron: '0 0 * * *' # Esegue la sincronizzazione ogni giorno a mezzanotte
+  workflow_dispatch: # Ti permette di avviarlo manualmente se serve
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync upstream changes
+        uses: aormsby/Fork-Sync-With-Upstream-action@v2.1
+        with:
+          upstream_repository: name/realbestia1/EasyProxy
+          upstream_branch: main
+          target_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
