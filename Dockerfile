@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Environment Settings
+# 2. Environment Settings
 ENV PYTHONPATH=/app
 ENV CHROME_EXE_PATH=/usr/bin/chromium
 ENV CHROME_BIN=/usr/bin/chromium
