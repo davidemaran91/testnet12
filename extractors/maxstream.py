@@ -515,20 +515,35 @@ class MaxstreamExtractor:
 
     def _parse_uprot_html(self, text: str) -> str:
         """Parse uprot HTML to extract redirect link."""
+        def valid_redirect(candidate: str) -> str | None:
+            if not candidate:
+                return None
+            parsed = urlparse(candidate)
+            if parsed.netloc and "maxstream.video" in parsed.netloc and parsed.path.startswith("/cdn-cgi/"):
+                logger.debug(f"Ignoring Cloudflare internal URL from uprot page: {candidate[:120]}")
+                return None
+            return candidate
+
         # 1. Look for direct links in text (including escaped slashes)
         match = re.search(r'https?://(?:www\.)?(?:stayonline\.pro|maxstream\.video)[^"\'\s<>\\ ]+', text.replace("\\/", "/"))
         if match:
-            return match.group(0)
+            redirect = valid_redirect(match.group(0))
+            if redirect:
+                return redirect
             
         # 2. Look for JavaScript-based redirects
         js_match = re.search(r'window\.location(?:\.href)?\s*=\s*["\']([^"\']+)["\']', text)
         if js_match:
-            return js_match.group(1)
+            redirect = valid_redirect(js_match.group(1))
+            if redirect:
+                return redirect
             
         # 3. Look for Meta refresh
         meta_match = re.search(r'content=["\']0;\s*url=([^"\']+)["\']', text, re.I)
         if meta_match:
-            return meta_match.group(1)
+            redirect = valid_redirect(meta_match.group(1))
+            if redirect:
+                return redirect
             
         # 4. Use BeautifulSoup for interactive elements
         soup = BeautifulSoup(text, "lxml")
@@ -542,18 +557,24 @@ class MaxstreamExtractor:
                     href = btn.parent.get("href")
                 
                 if href and "uprot" not in href:
-                    return href
+                    redirect = valid_redirect(href)
+                    if redirect:
+                        return redirect
         
         # Specific Bulma selectors
         for selector in ['a[href*="maxstream"]', 'a[href*="stayonline"]', '.button.is-info', '.button.is-success', 'a.button']:
             tag = soup.select_one(selector)
             if tag and tag.get("href") and "uprot" not in tag["href"]:
-                return tag["href"]
+                redirect = valid_redirect(tag["href"])
+                if redirect:
+                    return redirect
         
         # If it's a form
         form = soup.find("form")
         if form and form.get("action") and "uprot" not in form["action"]:
-            return form["action"]
+            redirect = valid_redirect(form["action"])
+            if redirect:
+                return redirect
             
         return None
 
@@ -647,7 +668,11 @@ class MaxstreamExtractor:
         """
         season = kwargs.get("season")
         episode = kwargs.get("episode")
-        maxstream_url = await self.get_uprot(url, season=season, episode=episode)
+        input_domain = urlparse(url).netloc.lower()
+        if "maxstream.video" in input_domain:
+            maxstream_url = url
+        else:
+            maxstream_url = await self.get_uprot(url, season=season, episode=episode)
         logger.debug(f"Target URL: {maxstream_url}")
         
         # Use strict headers to avoid Error 131
