@@ -120,6 +120,8 @@ To function correctly, the container needs elevated network permissions:
 docker run -d --name easyproxy --cap-add=NET_ADMIN --device /dev/net/tun -e ENABLE_WARP=true -p 7860:7860 ghcr.io/realbestia1/easyproxy:latest
 ```
 
+For restricted Docker environments that cannot expose `/dev/net/tun`, build the image and run with `-e ENABLE_WARP=true -e WARP_MODE=wireproxy`.
+
 > [!IMPORTANT]
 > If a provider has issues behind WARP, configure the host in `WARP_EXCLUDED_HOSTS`.
 > With WARP running as a VPN tunnel, bypass must be configured through the `WARP_EXCLUDED_HOSTS` environment variable so the host exits with the server real IP.
